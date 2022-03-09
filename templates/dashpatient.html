@@ -22,6 +22,8 @@
                   <li class="nav-item"> <a class="nav-link  text-white" id="hdbtn"> <span class="ms-2">Heart Disease</span> </a> </li>
                   <li class="nav-item"> <a class="nav-link  text-white" id="covbtn"><span class="ms-2">Covid19</span> </a> </li>
                   <li class="nav-item"> <a class="nav-link text-white" id="izbtn"><span class="ms-2">Immunization</span> </a> </li>
+                  <hr>
+                  <li class="nav-item"> <a class="nav-link text-white" id="booking"><span class="ms-2">Booking</span> </a> </li>
                 </ul>
               </div> 
             </div>
@@ -81,6 +83,41 @@
           </div>
         </div>
       </p>           
+</template>
+
+<template id="usrlist">   
+    <p>
+      <table class="table" style="width: 750px;">
+        <tbody>
+          <tr> 
+            <td>
+                <div class="p-2 d-flex flex-row align-items-center mb-2"> <img src="" class="rounded-circle imgdimen" style="width: 60px; height:60px">
+                    <div class="d-flex flex-column ml-2 ms-2"> <span class="d-block font-weight-bold psttitle"></span> <small class="text-muted">(Doctor)</small> </div>
+                </div>
+            </td>
+            <td>
+                <div class="p-2 float-end offset-me-4"> <span><button class="btn btn-warning appoint">Book Appointment</button></span></div>
+            </td>
+        
+          </tr>
+        </tbody>
+      </table>
+    </p>
+
+</template>
+
+<template id="appointfm">          
+  <p>
+    <div class="card" >                     
+      <div class="card-body">
+        <div class="row">
+          <div class="col-5 padding-0">
+              <p id="appfm"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </p>           
 </template>
     
   

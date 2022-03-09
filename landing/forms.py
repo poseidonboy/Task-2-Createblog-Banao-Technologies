@@ -1,4 +1,3 @@
-from unicodedata import category
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .models import Newuser, post
 from django import forms
@@ -42,3 +41,10 @@ class post_form(forms.ModelForm):
         'content':forms.Textarea(attrs={'class':'form-control','rows':'3', 'cols':'37', 'id':'content'}),
         
         }
+
+
+class bookingform(forms.Form):
+    dname=forms.CharField(widget=forms.HiddenInput())
+    required_speciality=forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'id':'id_sp'}))
+    date_of_appointment=forms.DateField(widget=forms.TextInput(attrs={'type':'date', 'id':'id_doa'}))
+    time_of_appointment=forms.TimeField(widget=forms.TextInput(attrs={'type':'time', 'id':'id_toa'}))

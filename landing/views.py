@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .forms import signup_form, login_form, post_form
+from .forms import signup_form, login_form, post_form, bookingform
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
@@ -8,8 +8,17 @@ from django.contrib.auth.models import Group
 from django.contrib import messages
 from .models import Newuser, post
 from json import dumps
+from django.contrib.auth import get_user_model
+from django.template.loader import render_to_string
+import json
+import datetime
+from datetime import timedelta
+import pytz
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+import iso8601
 
-
+ 
 
 # Create your views here.
 def onlanding(request):
@@ -88,8 +97,40 @@ def dashboard_doctor(request):
 
 @csrf_exempt
 def dashboard_patient(request):
+    if 'confm' in request.POST:
+        form=bookingform(request.POST)
+        if form.is_valid():
+            dn=form.cleaned_data['dname']
+            rs=form.cleaned_data['required_speciality']
+            doa=form.cleaned_data['date_of_appointment']
+            toa=form.cleaned_data['time_of_appointment']
+            cdt = datetime.datetime.combine(doa, toa)
+            evnt=create_event(dn, rs, cdt)
+            dt=iso8601.parse_date(evnt['start']['dateTime'])
+            enddt=iso8601.parse_date(evnt['end']['dateTime'])
+            dname=evnt['summary']
+            date=dt.date()
+            time=dt.time()
+            endtime=enddt.time()
+            context={
+                'dname':dname,
+                'date':date,
+                'time':time,
+                'endtime':endtime,
+            }
+
+            
+
+
+        return render(request, 'appointmentdetails.html', context)
+
     if request.method=="POST":
+        fm=bookingform()
+        template = render_to_string('booking.html', {'fm':fm})
         pstobj=post.objects.all()
+        Usr = get_user_model()
+        userogj = Usr.object.filter(groups__name='Doctor')
+        usr_data=[]
         blog_data=[]
         for pst in pstobj:
             item={
@@ -103,7 +144,24 @@ def dashboard_patient(request):
             }
             blog_data.append(item)
 
-        return JsonResponse({"postdata": blog_data})
+        for usr in userogj:
+            item={
+                "id":usr.id,
+                "username":usr.username,
+                "fname":usr.first_name,
+                "lname":usr.last_name,
+                "profilepic":usr.profilepic.url,
+            }
+            usr_data.append(item)
+
+
+        context={
+            "postdata":blog_data,
+            "usrdata":usr_data,
+            "appointform":template,
+        }
+
+        return JsonResponse({"alldata":context})
     else:
         defaultdata=post.objects.filter(categories="MENTAL HEALTH", is_draft=False)
     return render(request, 'dashpatient.html', {'dt':defaultdata})
@@ -117,3 +175,40 @@ def postview(request, pk):
     return render(request, 'viewpost.html', {'pt':postobj})
 
 
+
+def build_service():
+    service_account_email = "task3-615@task3-343409.iam.gserviceaccount.com "
+    SCOPES = ["https://www.googleapis.com/auth/calendar"]
+    credentials = service_account.Credentials.from_service_account_file('csfil.json')
+    scoped_credentials = credentials.with_scopes(SCOPES)
+    service = build("calendar", "v3", credentials=credentials)
+    return service
+
+def create_event(dn, rs, cdt):
+    service = build_service()
+    start_datetime = cdt.isoformat()+ "+05:30"
+    event = (
+        service.events()
+        .insert(
+            calendarId="m1mcqfo01qrn36bgdj5vo81m6c@group.calendar.google.com",
+            body={
+                "summary": dn,
+                "description": rs,
+                "start": {"dateTime": start_datetime},
+                "end": {
+                    "dateTime": (cdt + timedelta(minutes=45)).isoformat()+ "+05:30"
+                },
+            },
+        )
+        .execute()
+    )
+    return (event)
+
+@csrf_exempt
+def confrm(request):
+    if request.method == "POST":
+        usrname = json.loads(request.body)
+        fm=bookingform(initial={'dname':usrname['dt']})
+    
+        template = render_to_string('booking.html', {'fm':fm, 'dname':usrname['dt']})
+    return JsonResponse({"appointfm":template})

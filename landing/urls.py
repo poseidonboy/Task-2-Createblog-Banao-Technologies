@@ -9,6 +9,7 @@ urlpatterns = [
     path('dashpatient/', views.dashboard_patient, name="dashboardpat"),
     path('viewpost/<int:pk>', views.postview, name="viewpost"),
     path('logout/', views.user_logout, name="logout"),
+    path('confevent/', views.confrm, name="confirm"),
     
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

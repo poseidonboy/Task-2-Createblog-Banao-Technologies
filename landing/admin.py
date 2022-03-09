@@ -8,8 +8,8 @@ class useradmin(admin.ModelAdmin):
 
 
 @admin.register(post)
-class useradmin(admin.ModelAdmin):
+class post(admin.ModelAdmin):
     list_display= ('title', 'postimg', 'categories', 'summary','content','is_draft')
 
-    
+
  
